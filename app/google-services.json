@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "760557881424",
+    "firebase_url": "https://snapmatch-68695.firebaseio.com",
+    "project_id": "snapmatch-68695",
+    "storage_bucket": "snapmatch-68695.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:760557881424:android:37850549809e9bee",
+        "android_client_info": {
+          "package_name": "com.epicodus.snapmatch"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "760557881424-6d6j10hngpcvq33urbvi4trcihm3htoc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.epicodus.snapmatch",
+            "certificate_hash": "8c0fbd2c4cd6c3ed31ddb5274054099154365f90"
+          }
+        },
+        {
+          "client_id": "760557881424-4dc80iovl28uiu0r640g8kqf5s50so16.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJabAluHTFxUTIAOJ0huFuuB9zQLQBcb0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "760557881424-4dc80iovl28uiu0r640g8kqf5s50so16.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
