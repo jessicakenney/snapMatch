@@ -14,14 +14,20 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.epicodus.snapmatch.Manifest;
 import com.epicodus.snapmatch.R;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -34,7 +40,8 @@ import butterknife.ButterKnife;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     public static final String TAG = MainActivity.class.getSimpleName();
     @Bind(R.id.uploadTextView) TextView mUploadTextView;
-    @Bind(R.id.imageView) TextView mImageView;
+    @Bind(R.id.testImageView) ImageView mImageView;
+    @Bind(R.id.indeterminateBar) ProgressBar mProgressBar;
     FirebaseStorage mStorage = FirebaseStorage.getInstance();
     Boolean permissionGranted = false;
 
@@ -72,8 +79,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
 
         if (v == mUploadTextView){
-            Intent uploadPhotosIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+//            Intent intent = new Intent();
+            //multiple images?
+//            intent.setType("image/*");
+//            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+//            intent.setAction(Intent.ACTION_GET_CONTENT);
+//            startActivityForResult(Intent.createChooser(intent,"Select Picture"),1);
 
+            Intent uploadPhotosIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+            uploadPhotosIntent.setType("image/*");
             if (uploadPhotosIntent.resolveActivity(this.getPackageManager()) != null) {
                 startActivityForResult(uploadPhotosIntent, GET_FROM_GALLERY );
             }
@@ -85,38 +99,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
+        Log.v(TAG, "HELLLLO"+data);
 
             //Detects request codes
             if(requestCode==GET_FROM_GALLERY && resultCode == Activity.RESULT_OK) {
-                Uri selectedImage = data.getData();
+                Uri selectedImageUri = data.getData();
                 Bitmap bitmap = null;
                 try {
-                    Bitmap imageBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImage);
+                    Bitmap imageBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImageUri);
                     mImageView.setImageBitmap(imageBitmap);
-                    encodeBitmapAndSaveToFirebase(imageBitmap);
-                    //something more here
-//                    byte[] data = baos.toByteArray();
-//
-//                    String path = "gameX/" + UUID.randomUUID() + ".png";
-//                    StorageReference gameXRef = mStorage.getReference(path);
-//
-//                    progressBar.setVisibility(View.VISIBLE);
-//                    //uploadButton.setEnabled(false);
-//
-//                    UploadTask uploadTask = gameRef.putBytes(data);
-//                    uploadTask.addOnSuccessListener(MainActivity.this, new OnSuccessListener<UploadTask.TaskSnapshot>() {
-//                        @Override
-//                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-//                            progressBar.setVisibility(View.GONE);
-//                            //uploadButton.setEnabled(true);
-//
-//                            Uri url = taskSnapshot.getDownloadUrl();
-//                            downloadUrl.setText(url.toString());
-//                            downloadUrl.setVisibilty(View.VISIBLE);
-//
-//                        }
-//                    });
+                    saveToFirebaseStorage(imageBitmap);
 
                 } catch (FileNotFoundException e) {
                     // TODO Auto-generated catch block
@@ -128,19 +120,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
 
-    public void encodeBitmapAndSaveToFirebase(Bitmap bitmap) {
+
+    public void saveToFirebaseStorage(Bitmap bitmap) {
+        // Create sotrage reference
+        String path = "currentUserGallery/" + UUID.randomUUID() + ".png";
+        StorageReference galleryRef = mStorage.getReference(path);
+        mProgressBar.setVisibility(View.VISIBLE);
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
-        //String imageEncoded = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
-        String path = "gameX/" + UUID.randomUUID() + ".png";
+        byte[] data = baos.toByteArray();
+
         Log.v(TAG,"PATH to photo : "+path);
 
-//        DatabaseReference ref = FirebaseDatabase.getInstance()
-//                .getReference(Constants.FIREBASE_CHILD_RESTAURANTS)
-//                .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-//                .child(mRestaurant.getPushId())
-//                .child("imageUrl");
-//        ref.setValue(imageEncoded);
+        //uploadButton.setEnabled(false);
+        //firebase thang ...hmmm
+        UploadTask uploadTask = galleryRef.putBytes(data);
+        uploadTask.addOnSuccessListener(MainActivity.this, new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                toastMessage("You are doing a great job, Keep it up, you are almost there");
+                mProgressBar.setVisibility(View.GONE);
+                //uploadButton.setEnabled(true);
+                Uri url = taskSnapshot.getDownloadUrl();
+                //downloadUrl.setText(url.toString());
+                //downloadUrl.setVisibilty(View.VISIBLE);
+
+            }
+        });
 
     }
 
@@ -150,7 +157,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * @param message
      */
     private void toastMessage(String message){
-        //usage: toastMessage("Upload Failed");
         Toast.makeText(this,message,Toast.LENGTH_SHORT).show();
     }
 
