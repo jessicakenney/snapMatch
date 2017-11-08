@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -23,6 +24,8 @@ import android.widget.Toast;
 
 import com.epicodus.snapmatch.R;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -48,6 +51,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     Boolean permissionGranted = false;
 
     private static final int GET_FROM_GALLERY = 111;
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
+
 
 
     @Override
@@ -56,9 +62,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
         setSupportActionBar(mToolbar);
 
-
         ButterKnife.bind(this);
-
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mDrawer, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -70,12 +74,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mUploadTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //            Intent intent = new Intent();
-                //multiple images?
-//            intent.setType("image/*");
-//            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-//            intent.setAction(Intent.ACTION_GET_CONTENT);
-//            startActivityForResult(Intent.createChooser(intent,"Select Picture"),1);
 
                 Intent uploadPhotosIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
                 uploadPhotosIntent.setType("image/*");
@@ -83,13 +81,41 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     startActivityForResult(uploadPhotosIntent, GET_FROM_GALLERY );
                 }
             }
-
         });
 
+        mAuth = FirebaseAuth.getInstance();
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                //display welcome message
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    //getSupportActionBar().setTitle("Welcome, " + user.getDisplayName() + "!");
+                } else {
+
+                }
+            }
+        };
 
         if (!permissionGranted) {
             checkFilePermissions();
             return;
+        }
+
+
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
         }
     }
 
@@ -109,6 +135,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
+
+        if (id == R.id.action_logout) {
+            logout();
+            return true;
+        }
 
 //        if (id == R.id.nav_camera) {
 //            // Handle the camera action
@@ -153,6 +184,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
@@ -160,6 +192,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         return super.onOptionsItemSelected(item);
     }
+
+    private void logout() {
+        FirebaseAuth.getInstance().signOut();
+        Log.v(TAG, "SIGNING OUT");
+        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
