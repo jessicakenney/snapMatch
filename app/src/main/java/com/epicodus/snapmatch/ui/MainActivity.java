@@ -2,27 +2,25 @@ package com.epicodus.snapmatch.ui;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Base64;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.epicodus.snapmatch.Manifest;
 import com.epicodus.snapmatch.R;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
@@ -37,11 +35,15 @@ import java.util.UUID;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     public static final String TAG = MainActivity.class.getSimpleName();
     @Bind(R.id.uploadTextView) TextView mUploadTextView;
     @Bind(R.id.testImageView) ImageView mImageView;
-    @Bind(R.id.indeterminateBar) ProgressBar mProgressBar;
+    //@Bind(R.id.indeterminateBar) ProgressBar mProgressBar;
+    @Bind(R.id.nav_view) NavigationView mNavigationView;
+    @Bind(R.id.toolbar) Toolbar mToolbar;
+    @Bind(R.id.drawer_layout) DrawerLayout mDrawer;
+
     FirebaseStorage mStorage = FirebaseStorage.getInstance();
     Boolean permissionGranted = false;
 
@@ -52,10 +54,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setSupportActionBar(mToolbar);
+
 
         ButterKnife.bind(this);
 
-        mUploadTextView.setOnClickListener(this);
+
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, mDrawer, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        mDrawer.setDrawerListener(toggle);
+        toggle.syncState();
+
+        mNavigationView.setNavigationItemSelectedListener(this);
+
+        mUploadTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //            Intent intent = new Intent();
+                //multiple images?
+//            intent.setType("image/*");
+//            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+//            intent.setAction(Intent.ACTION_GET_CONTENT);
+//            startActivityForResult(Intent.createChooser(intent,"Select Picture"),1);
+
+                Intent uploadPhotosIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+                uploadPhotosIntent.setType("image/*");
+                if (uploadPhotosIntent.resolveActivity(getPackageManager()) != null) {
+                    startActivityForResult(uploadPhotosIntent, GET_FROM_GALLERY );
+                }
+            }
+
+        });
+
 
         if (!permissionGranted) {
             checkFilePermissions();
@@ -76,25 +106,60 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    public void onClick(View v) {
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
 
-        if (v == mUploadTextView){
-//            Intent intent = new Intent();
-            //multiple images?
-//            intent.setType("image/*");
-//            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-//            intent.setAction(Intent.ACTION_GET_CONTENT);
-//            startActivityForResult(Intent.createChooser(intent,"Select Picture"),1);
+//        if (id == R.id.nav_camera) {
+//            // Handle the camera action
+//        } else if (id == R.id.nav_gallery) {
+//
+//        } else if (id == R.id.nav_slideshow) {
+//
+//        } else if (id == R.id.nav_manage) {
+//
+//        } else if (id == R.id.nav_share) {
+//
+//        } else if (id == R.id.nav_send) {
+//
+//        }
 
-            Intent uploadPhotosIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
-            uploadPhotosIntent.setType("image/*");
-            if (uploadPhotosIntent.resolveActivity(this.getPackageManager()) != null) {
-                startActivityForResult(uploadPhotosIntent, GET_FROM_GALLERY );
-            }
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
 
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
         }
 
-    }//onClick
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -125,7 +190,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // Create sotrage reference
         String path = "currentUserGallery/" + UUID.randomUUID() + ".png";
         StorageReference galleryRef = mStorage.getReference(path);
-        mProgressBar.setVisibility(View.VISIBLE);
+        //mProgressBar.setVisibility(View.GONE);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
@@ -140,7 +205,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 toastMessage("You are doing a great job, Keep it up, you are almost there");
-                mProgressBar.setVisibility(View.GONE);
+                //mProgressBar.setVisibility(View.GONE);
                 //uploadButton.setEnabled(true);
                 Uri url = taskSnapshot.getDownloadUrl();
                 //downloadUrl.setText(url.toString());
