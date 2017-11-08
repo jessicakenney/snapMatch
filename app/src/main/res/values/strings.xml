@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">SnapMatch</string>
+    <string name="my_games">My Games</string>
+    <string name="create_game">Create New Game</string>
 </resources>
