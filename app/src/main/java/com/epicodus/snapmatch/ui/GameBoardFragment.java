@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,7 @@ import butterknife.Bind;
  * A simple {@link Fragment} subclass.
  */
 public class GameBoardFragment extends Fragment {
+    public static final String TAG = GameBoardFragment.class.getSimpleName();
     @Bind(R.id.recyclerView)
     RecyclerView mRecyclerView;
     private GameBoardAdapter mAdapter;
@@ -37,6 +39,7 @@ public class GameBoardFragment extends Fragment {
         GameBoardFragment fragment = new GameBoardFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
+        Log.v(TAG,">>>>>>newInstance gameboardFragment");
         return fragment;
     }
 
@@ -44,6 +47,7 @@ public class GameBoardFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        Log.v(TAG,">>>>>>onCreateView gameboardFragment");
         return inflater.inflate(R.layout.fragment_gameboard, container, false);
     }
 
@@ -58,6 +62,7 @@ public class GameBoardFragment extends Fragment {
         //current user, game selected
         //hard code for now
         mSelectedGame = "bestgameever";
+        Log.v(TAG,">>>>>>onViewCreated .... gameboardFragment");
         getTiles(mSelectedGame);
 
     }
@@ -66,6 +71,7 @@ public class GameBoardFragment extends Fragment {
 
         //this is where you will call to firebase for now hardcode
         //mTiles = ;
+        Log.v(TAG,">>>>>>Needsome tiles to get .... gameboardFragment");
 
         getActivity().runOnUiThread(new Runnable() {
             // Line above states 'getActivity()' instead of previous 'RestaurantListActivity.this'
