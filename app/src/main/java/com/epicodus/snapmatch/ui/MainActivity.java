@@ -308,7 +308,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void displayGameFragment(){
         setTitle("GAME");
-        setFragment(GameFragment.newInstance(), "GameFragment");
+        setFragment(GameBoardFragment.newInstance(), "GameBoardFragment");
         mPlaceHolderText.setVisibility(View.INVISIBLE);
     }
     private void setFragment (Fragment fragment, String fragmentName){
