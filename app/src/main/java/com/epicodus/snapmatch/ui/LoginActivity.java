@@ -40,6 +40,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
 
+        Log.v(TAG,"WHERE IS MY LOGIN WINDOW");
+
+
         //mTitleTextView.setTypeface(typeface);
 
         mRegisterTextView.setOnClickListener(this);
@@ -53,7 +56,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
+                Log.v(TAG,"WHERE IS MY LOGIN WINDOW fb override USER: "+ user);
                 if (user != null) {
+                    Log.v(TAG,"WHERE IS MY LOGIN WINDOW user not null");
                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);

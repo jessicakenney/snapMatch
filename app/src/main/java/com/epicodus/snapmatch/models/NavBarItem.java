@@ -2,15 +2,15 @@ package com.epicodus.snapmatch.models;
 
 import com.epicodus.snapmatch.R;
 
-import java.util.IllegalFormatCodePointException;
-
 /**
  * Created by momma on 11/7/17.
  */
 
 public enum NavBarItem {
     MY_GAMES(R.id.my_games),
-    CREATE_GAME(R.id.create_game);
+    CREATE_GAME(R.id.create_game),
+    GALLERY(R.id.gallery),
+    LOGOUT(R.id.action_logout);
 
     private int itemId;
     NavBarItem(int itemId) {

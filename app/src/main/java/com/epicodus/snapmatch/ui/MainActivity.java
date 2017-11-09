@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -23,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.epicodus.snapmatch.R;
+import com.epicodus.snapmatch.models.NavBarItem;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -38,7 +41,7 @@ import java.util.UUID;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
     public static final String TAG = MainActivity.class.getSimpleName();
     @Bind(R.id.uploadTextView) TextView mUploadTextView;
     @Bind(R.id.testImageView) ImageView mImageView;
@@ -46,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Bind(R.id.nav_view) NavigationView mNavigationView;
     @Bind(R.id.toolbar) Toolbar mToolbar;
     @Bind(R.id.drawer_layout) DrawerLayout mDrawer;
+    @Bind(R.id.placeHolderText) TextView mPlaceHolderText;
 
     FirebaseStorage mStorage = FirebaseStorage.getInstance();
     Boolean permissionGranted = false;
@@ -60,21 +64,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setSupportActionBar(mToolbar);
 
-        ButterKnife.bind(this);
+        inflateViews();
 
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, mDrawer, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        mDrawer.setDrawerListener(toggle);
-        toggle.syncState();
+        if (!permissionGranted) {
+            checkFilePermissions();
+            return;
+        }
 
-        mNavigationView.setNavigationItemSelectedListener(this);
-
+        // Test Upload Intent
         mUploadTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 Intent uploadPhotosIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
                 uploadPhotosIntent.setType("image/*");
                 if (uploadPhotosIntent.resolveActivity(getPackageManager()) != null) {
@@ -97,18 +98,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         };
 
-        if (!permissionGranted) {
-            checkFilePermissions();
-            return;
-        }
+    }
 
+    private void inflateViews(){
+       //initialize views
+        ButterKnife.bind(this);
+        setSupportActionBar(mToolbar);
+
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, mDrawer, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        mDrawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        setNavBarButtons();
 
     }
 
+    private void setNavBarButtons(){
+       for (NavBarItem item : NavBarItem.values() ){
+           TextView itemView = (TextView) findViewById(item.getItemId());
+           itemView.setOnClickListener(this);
+       }
+    }
     @Override
     public void onStart() {
         super.onStart();
-        mAuth.addAuthStateListener(mAuthListener);
+        if (mAuth != null) {
+            mAuth.addAuthStateListener(mAuthListener);
+        }
     }
 
     @Override
@@ -136,10 +153,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.action_logout) {
-            logout();
-            return true;
-        }
 
 //        if (id == R.id.nav_camera) {
 //            // Handle the camera action
@@ -201,8 +214,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         startActivity(intent);
         finish();
     }
-
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -268,7 +279,43 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
-  }
+    @Override
+    public void onClick(View v) {
+        switch (NavBarItem.fromViewId(v.getId())){
+            case MY_GAMES:
+                Log.v(TAG, "MYGAMES ");
+                mDrawer.closeDrawer(GravityCompat.START);
+                displayGameFragment();
+                break;
+
+            case CREATE_GAME:
+                Log.v(TAG, "CREATEGAME ");
+                mDrawer.closeDrawer(GravityCompat.START);
+                break;
+
+            case LOGOUT:
+                Log.v(TAG, "LOGOUT ");
+                logout();
+                mDrawer.closeDrawer(GravityCompat.START);
+                break;
+
+            case GALLERY:
+                Log.v(TAG, "GALLERY ");
+                mDrawer.closeDrawer(GravityCompat.START);
+                break;
+        }
+    }
+
+    private void displayGameFragment(){
+        setTitle("GAME");
+        setFragment(GameFragment.newInstance(), "GameFragment");
+        mPlaceHolderText.setVisibility(View.INVISIBLE);
+    }
+    private void setFragment (Fragment fragment, String fragmentName){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction().replace(R.id.content_layout, fragment, fragmentName);
+    };
+}
 
 
 

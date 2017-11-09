@@ -18,7 +18,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:id="@+id/textView2" />
+        android:id="@+id/placeHolderText" />
     <TextView
         android:id="@+id/uploadTextView"
         android:layout_width="wrap_content"
@@ -26,7 +26,7 @@
         android:text="Upload Photos from Gallery"
         android:layout_alignParentEnd="true"
         android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/textView2"
+        app:layout_constraintTop_toBottomOf="@+id/placeHolderText"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginBottom="8dp"
         android:layout_marginRight="8dp"
