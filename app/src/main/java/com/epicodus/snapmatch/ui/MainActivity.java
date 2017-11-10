@@ -43,7 +43,7 @@ import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
     public static final String TAG = MainActivity.class.getSimpleName();
-    @Bind(R.id.uploadTextView) TextView mUploadTextView;
+    //@Bind(R.id.uploadTextView) TextView mUploadTextView;
     @Bind(R.id.testImageView) ImageView mImageView;
     //@Bind(R.id.indeterminateBar) ProgressBar mProgressBar;
     @Bind(R.id.nav_view) NavigationView mNavigationView;
@@ -72,17 +72,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return;
         }
 
+        //mUploadTextView.setOnClickListener(this);
         // Test Upload Intent
-        mUploadTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent uploadPhotosIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
-                uploadPhotosIntent.setType("image/*");
-                if (uploadPhotosIntent.resolveActivity(getPackageManager()) != null) {
-                    startActivityForResult(uploadPhotosIntent, GET_FROM_GALLERY );
-                }
-            }
-        });
+//        mUploadTextView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Intent uploadPhotosIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+//                uploadPhotosIntent.setType("image/*");
+//                if (uploadPhotosIntent.resolveActivity(getPackageManager()) != null) {
+//                    startActivityForResult(uploadPhotosIntent, GET_FROM_GALLERY );
+//                }
+//            }
+//        });
 
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -281,6 +282,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onClick(View v) {
+        Log.v(TAG, "Something clicked ");
+
         switch (NavBarItem.fromViewId(v.getId())){
             case MY_GAMES:
                 Log.v(TAG, "MYGAMES ");
@@ -302,8 +305,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case GALLERY:
                 Log.v(TAG, "GALLERY ");
                 mDrawer.closeDrawer(GravityCompat.START);
+                Intent uploadPhotosIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+                uploadPhotosIntent.setType("image/*");
+                if (uploadPhotosIntent.resolveActivity(getPackageManager()) != null) {
+                    startActivityForResult(uploadPhotosIntent, GET_FROM_GALLERY);
+                }
                 break;
-        }
+            }
+
+//        if (v == mUploadTextView) {
+//            Log.v(TAG, ">>>>>>Upload clicked ");
+//            Intent uploadPhotosIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+//            uploadPhotosIntent.setType("image/*");
+//            if (uploadPhotosIntent.resolveActivity(getPackageManager()) != null) {
+//                startActivityForResult(uploadPhotosIntent, GET_FROM_GALLERY);
+//            }
     }
 
     private void displayGameFragment(){
@@ -314,7 +330,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void setFragment (Fragment fragment, String fragmentName){
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.content_layout, fragment, fragmentName);
-    };
+    }
 }
 
 
